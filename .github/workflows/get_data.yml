@@ -31,5 +31,5 @@ jobs:
           git add results/*
           git commit -m "Update data"
           git push origin main
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
