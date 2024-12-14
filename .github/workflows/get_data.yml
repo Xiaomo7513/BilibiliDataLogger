@@ -26,8 +26,10 @@ jobs:
 
       - name: Commit changes
         run: |
-          git config --global user.name ${{ secrets.USER_NAME }}
-          git config --global user.email ${{ secrets.USER_EMAIL }}
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "githubactions@github.com"
           git add results/*
           git commit -m "Update data"
           git push origin main
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
