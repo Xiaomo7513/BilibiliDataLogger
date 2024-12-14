@@ -20,6 +20,7 @@ if os.path.exists(f'results/{BVID}.json'):
     with open(f'results/{BVID}.json', 'r', encoding='utf-8') as f:
         data = json.load(f)
 else:
+    if not os.path.exists('results'): os.mkdir('results')
     data = {}
 data[int(time.time())] = get_video_stats(BVID)
 with open(f'results/{BVID}.json', 'w', encoding='utf-8') as f:
