@@ -26,7 +26,8 @@ jobs:
 
       - name: Commit changes
         run: |
-          # git config --global user.name 'BilibiliDataLogger'
+          git config --global user.name ${{ secrets.USER_NAME }}
+          git config --global user.email ${{ secrets.USER_EMAIL }}
           git add results/*
           git commit -m "Update data"
           git push origin main
