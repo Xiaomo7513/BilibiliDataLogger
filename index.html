@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Bilibili Data Logger</title>
+        <meta charset="UTF-8">
+        <!-- <script src="https://cdn.jsdelivr.net/npm/echarts/dist/echarts.min.js"></script> -->
+        <script src="echarts.min.js"></script>
+    </head>
+    <body>
+        <div id="chart" style="width: 90vw; height: 90vh;"></div>
+        <script>
+            function setChart(container, data) {
+                var chart = echarts.init(container);
+                var option = {
+                    tooltip: {
+                        trigger: 'axis'
+                    },
+                    legend: {},
+                    dataset: {
+                        source: []
+                    },
+                    xAxis: {
+                        type: 'time'
+                    },
+                    yAxis: {
+                        scale: true
+                    },
+                    series: [
+                        {
+                            name: '播放量',
+                            type: 'line',
+                            encode: {x: 'date', y: 'view'}
+                        },
+                        {
+                            name: '弹幕数',
+                            type: 'line',
+                            encode: {x: 'date', y: 'danmaku'}
+                        },
+                        {
+                            name: '评论数',
+                            type: 'line',
+                            encode: {x: 'date', y: 'comment'}
+                        },
+                        {
+                            name: '收藏数',
+                            type: 'line',
+                            encode: {x: 'date', y: 'favorite'}
+                        },
+                        {
+                            name: '硬币数',
+                            type: 'line',
+                            encode: {x: 'date', y: 'coin'}
+                        },
+                        {
+                            name: '分享数',
+                            type: 'line',
+                            encode: {x: 'date', y: 'share'}
+                        },
+                        {
+                            name: '点赞数',
+                            type: 'line',
+                            encode: {x: 'date', y: 'like'}
+                        }
+                    ]
+                };
+                const result = [["date", "view", "danmaku", "comment", "favorite", "coin", "share", "like"]];
+                for (const [date, stats] of Object.entries(data)) {
+                    timestamp = +new Date(date.substring(0, 4), date.substring(4, 6) - 1, date.substring(6, 8));
+                    result.push([timestamp, ...stats]);
+                }
+                option.dataset.source = result;
+                chart.setOption(option);
+
+                chart.dispatchAction({type: 'legendInverseSelect'});
+                chart.dispatchAction({type: 'legendSelect', name: '播放量'});
+                chart.on('legendselectchanged', (params) => {
+                    chart.dispatchAction({type: 'legendAllSelect'});
+                    chart.dispatchAction({type: 'legendInverseSelect'});
+                    chart.dispatchAction({type: 'legendSelect', name: params.name});
+                });
+                new ResizeObserver(chart.resize).observe(container);
+            }
+
+            fetch('results/BV1Y7SWYpERP.json')
+                .then(response => response.json())
+                .then(json => {
+                    setChart(document.getElementById('chart'), json);
+                });
+        </script>
+    </body>
+</html>
