@@ -11,8 +11,8 @@ def get_video_stats(bvid):
     }
     url = API.format(bvid)
     data = requests.get(url, headers=headers).json()
-    # for key in ('view', 'danmaku', 'reply', 'favorite', 'coin', 'share', 'like'):
-    return {key: data['data']['stat'][key] for key in ('view', 'danmaku', 'reply', 'favorite', 'coin', 'share', 'like')}
+    # [<播放量>, <弹幕数>, <评论数>, <收藏数>, <硬币数>, <分享数>, <点赞数>]
+    return [data['data']['stat'][key] for key in ('view', 'danmaku', 'reply', 'favorite', 'coin', 'share', 'like')]
 
 BVID = argv[1]
 
@@ -22,6 +22,6 @@ if os.path.exists(f'results/{BVID}.json'):
 else:
     if not os.path.exists('results'): os.mkdir('results')
     data = {}
-data[int(time.time())] = get_video_stats(BVID)
+data[time.strftime('%Y%m%d')] = get_video_stats(BVID)
 with open(f'results/{BVID}.json', 'w', encoding='utf-8') as f:
-    json.dump(data, f, ensure_ascii=False, indent=4)
+    json.dump(data, f, separators=(',', ':'))
