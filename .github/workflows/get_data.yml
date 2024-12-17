@@ -1,7 +1,7 @@
 name: Get Data
 on:
   schedule:
-    - cron: '0 0 * * *'
+    - cron: '0 16 * * *' # 0:00 (UTC+8)
   workflow_dispatch:
 
 jobs:
