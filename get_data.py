@@ -14,14 +14,15 @@ def get_video_stats(bvid):
     # [<播放量>, <弹幕数>, <评论数>, <收藏数>, <硬币数>, <分享数>, <点赞数>]
     return [data['data']['stat'][key] for key in ('view', 'danmaku', 'reply', 'favorite', 'coin', 'share', 'like')]
 
-BVID = argv[1]
+BVIDs = argv[1:]
 
-if os.path.exists(f'results/{BVID}.json'):
-    with open(f'results/{BVID}.json', 'r', encoding='utf-8') as f:
-        data = json.load(f)
-else:
-    if not os.path.exists('results'): os.mkdir('results')
-    data = {}
-data[time.strftime('%Y%m%d')] = get_video_stats(BVID)
-with open(f'results/{BVID}.json', 'w', encoding='utf-8') as f:
-    json.dump(data, f, separators=(',', ':'))
+for BVID in BVIDs:
+    if os.path.exists(f'results/{BVID}.json'):
+        with open(f'results/{BVID}.json', 'r', encoding='utf-8') as f:
+            data = json.load(f)
+    else:
+        if not os.path.exists('results'): os.mkdir('results')
+        data = {}
+    data[time.strftime('%Y%m%d')] = get_video_stats(BVID)
+    with open(f'results/{BVID}.json', 'w', encoding='utf-8') as f:
+        json.dump(data, f, separators=(',', ':'))
