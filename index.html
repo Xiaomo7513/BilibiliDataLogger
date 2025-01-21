@@ -20,7 +20,10 @@
                         source: []
                     },
                     xAxis: {
-                        type: 'time'
+                        type: 'time',
+                        axisLabel: {
+                            formatter: '{yyyy}-{MM}-{dd}'
+                        }
                     },
                     yAxis: {
                         scale: true
@@ -65,8 +68,7 @@
                 };
                 const result = [["date", "view", "danmaku", "comment", "favorite", "coin", "share", "like"]];
                 for (const [date, stats] of Object.entries(data)) {
-                    timestamp = +new Date(date.substring(0, 4), date.substring(4, 6) - 1, date.substring(6, 8));
-                    result.push([timestamp, ...stats]);
+                    result.push([date*1000, ...stats]);
                 }
                 option.dataset.source = result;
                 chart.setOption(option);

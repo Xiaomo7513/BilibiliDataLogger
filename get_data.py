@@ -23,6 +23,6 @@ for BVID in BVIDs:
     else:
         if not os.path.exists('results'): os.mkdir('results')
         data = {}
-    data[time.strftime('%Y%m%d')] = get_video_stats(BVID)
+    data[int(time.time())] = get_video_stats(BVID)
     with open(f'results/{BVID}.json', 'w', encoding='utf-8') as f:
         json.dump(data, f, separators=(',', ':'))
