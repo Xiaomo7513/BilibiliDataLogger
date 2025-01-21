@@ -15,7 +15,9 @@
                     tooltip: {
                         trigger: 'axis'
                     },
-                    legend: {},
+                    legend: {
+                        selectedMode: 'single'
+                    },
                     dataset: {
                         source: []
                     },
@@ -73,13 +75,6 @@
                 option.dataset.source = result;
                 chart.setOption(option);
 
-                chart.dispatchAction({type: 'legendInverseSelect'});
-                chart.dispatchAction({type: 'legendSelect', name: '播放量'});
-                chart.on('legendselectchanged', (params) => {
-                    chart.dispatchAction({type: 'legendAllSelect'});
-                    chart.dispatchAction({type: 'legendInverseSelect'});
-                    chart.dispatchAction({type: 'legendSelect', name: params.name});
-                });
                 new ResizeObserver(chart.resize).observe(container);
             }
 
