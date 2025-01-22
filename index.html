@@ -8,16 +8,15 @@
     </head>
     <body>
         <div id="chart" style="width: 90vw; height: 90vh;"></div>
+        <div id="rate" style="width: 90vw; height: 90vh;"></div>
         <script>
-            function setChart(container, data) {
+            function setChart(container, data, customOption) {
                 var chart = echarts.init(container);
                 var option = {
                     tooltip: {
                         trigger: 'axis'
                     },
-                    legend: {
-                        selectedMode: 'single'
-                    },
+                    legend: {},
                     dataset: {
                         source: []
                     },
@@ -68,6 +67,9 @@
                         }
                     ]
                 };
+                if (customOption) {
+                    Object.assign(option, customOption);
+                }
                 const result = [["date", "view", "danmaku", "comment", "favorite", "coin", "share", "like"]];
                 for (const [date, stats] of Object.entries(data)) {
                     result.push([date*1000, ...stats]);
@@ -78,10 +80,42 @@
                 new ResizeObserver(chart.resize).observe(container);
             }
 
-            fetch('results/BV1Y7SWYpERP.json')
+            const BVID = 'BV1Y7SWYpERP';
+            fetch(`results/${BVID}.json`)
                 .then(response => response.json())
                 .then(json => {
-                    setChart(document.getElementById('chart'), json);
+                    setChart(document.getElementById('chart'), json, {
+                        title: {
+                            text: `${BVID} - 数据`
+                        },
+                        legend: {
+                            selectedMode: 'single'
+                        }
+                    });
+
+                    const data = Object.entries(json);
+                    console.log(data);
+                    var rates = {};
+                    for (let i in data) {
+                        i = +i;
+                        if (data[i + 1] !== undefined) {
+                            rates[data[i + 1][0]] = data[i][1].map((value, index) => (data[i + 1][1][index] - value) / value);
+                        }
+                    }
+                    console.log(rates);
+                    setChart(document.getElementById('rate'), rates, {
+                        title: {
+                            text: `${BVID} - 增长率`
+                        },
+                        legend: {},
+                        tooltip: {
+                            trigger: 'axis',
+                            valueFormatter: (value) => `${(value*100).toFixed(3)}%`
+                        },
+                        yAxis: {
+                            formatter: (value) => `${(value*100).toFixed(3)}%`
+                        }
+                    });
                 });
         </script>
     </body>
