@@ -7,27 +7,15 @@
         <script src="echarts.min.js"></script>
     </head>
     <body>
+        <select id="logs"></select>
         <div id="chart" style="width: 90vw; height: 90vh;"></div>
         <div id="rate" style="width: 90vw; height: 90vh;"></div>
         <script>
             function setChart(container, data, customOption) {
-                function deepMerge(target, source) {
-                    for (let key in source) {
-                        if (source.hasOwnProperty(key)) {
-                            if (typeof source[key] === 'object' && source[key] !== null && !Array.isArray(source[key])) {
-                                if (typeof target[key] !== 'object' || target[key] === null) {
-                                    target[key] = {};
-                                }
-                                deepMerge(target[key], source[key]);
-                            } else {
-                                target[key] = source[key];
-                            }
-                        }
-                    }
-                    return target;
+                if (!container.chart) {
+                    container.chart = echarts.init(container);
+                    new ResizeObserver(container.chart.resize).observe(container);
                 }
-
-                var chart = echarts.init(container);
                 var option = {
                     tooltip: {
                         trigger: 'axis'
@@ -83,56 +71,69 @@
                         }
                     ]
                 };
-                if (customOption) {
-                    deepMerge(option, customOption);
-                }
-                console.log(option);
                 const result = [["date", "view", "danmaku", "comment", "favorite", "coin", "share", "like"]];
                 for (const [date, stats] of Object.entries(data)) {
                     result.push([date*1000, ...stats]);
                 }
                 option.dataset.source = result;
-                chart.setOption(option);
-
-                new ResizeObserver(chart.resize).observe(container);
+                container.chart.setOption(option);
+                if (customOption) container.chart.setOption(customOption);
             }
 
-            const BVID = 'BV1Y7SWYpERP';
-            fetch(`results/${BVID}.json`)
+            function drawChart(bvid) {
+                fetch(`results/${bvid}.json`)
+                    .then(response => response.json())
+                    .then(json => {
+                        setChart(document.getElementById('chart'), json, {
+                            title: {
+                                text: `${bvid} - 数据`,
+                                link: `https://www.bilibili.com/video/${bvid}`
+                            },
+                            legend: {
+                                selectedMode: 'single'
+                            }
+                        });
+
+                        const data = Object.entries(json);
+                        var rates = {};
+                        for (let i in data) {
+                            i = +i;
+                            if (data[i + 1] !== undefined) {
+                                rates[data[i + 1][0]] = data[i][1].map((value, index) => (data[i + 1][1][index] - value) / value);
+                            }
+                        }
+                        setChart(document.getElementById('rate'), rates, {
+                            title: {
+                                text: `${bvid} - 增长率`,
+                                link: `https://www.bilibili.com/video/${bvid}`,
+                                subtext: '如果你看到了负数，那么……恭喜你发现了宝藏！'
+                            },
+                            legend: {
+                                selector: true,
+                            },
+                            tooltip: {
+                                valueFormatter: (value) => `${(value*100).toFixed(3)}%`
+                            },
+                            yAxis: {
+                                formatter: (value) => `${(value*100).toFixed(3)}%`
+                            }
+                        });
+                    });
+            }
+            
+            fetch('results/index.json')
                 .then(response => response.json())
                 .then(json => {
-                    setChart(document.getElementById('chart'), json, {
-                        title: {
-                            text: `${BVID} - 数据`,
-                            link: `https://www.bilibili.com/video/${BVID}`
-                        },
-                        legend: {
-                            selectedMode: 'single'
-                        }
-                    });
-
-                    const data = Object.entries(json);
-                    var rates = {};
-                    for (let i in data) {
-                        i = +i;
-                        if (data[i + 1] !== undefined) {
-                            rates[data[i + 1][0]] = data[i][1].map((value, index) => (data[i + 1][1][index] - value) / value);
-                        }
+                    const select = document.getElementById('logs');
+                    for (const [title, bvid] of Object.entries(json)) {
+                        const option = document.createElement('option');
+                        option.text = title;
+                        option.value = bvid;
+                        select.add(option);
                     }
-                    setChart(document.getElementById('rate'), rates, {
-                        title: {
-                            text: `${BVID} - 增长率`,
-                            link: `https://www.bilibili.com/video/${BVID}`
-                        },
-                        legend: {
-                            selector: true,
-                        },
-                        tooltip: {
-                            valueFormatter: (value) => `${(value*100).toFixed(3)}%`
-                        },
-                        yAxis: {
-                            formatter: (value) => `${(value*100).toFixed(3)}%`
-                        }
+                    drawChart(json[Object.keys(json)[0]]);
+                    select.addEventListener('change', (event) => {
+                        drawChart(event.target.value);
                     });
                 });
         </script>

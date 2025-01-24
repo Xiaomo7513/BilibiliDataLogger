@@ -26,3 +26,19 @@ for BVID in BVIDs:
     data[int(time.time())] = get_video_stats(BVID)
     with open(f'results/{BVID}.json', 'w', encoding='utf-8') as f:
         json.dump(data, f, separators=(',', ':'))
+
+# 生成文件索引
+index = {}
+bvids = [bvid.rstrip('.json') for bvid in os.listdir('results') if bvid != 'index.json']
+for bvid in bvids:
+    index[requests.get(f'https://api.bilibili.com/x/web-interface/view?bvid={bvid}', headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36'}).json()['data']['title']] = bvid  # 这行真的好长啊但是不想改了
+print(index)
+if os.path.exists('results/index.json'):
+    with open('results/index.json', 'r', encoding='utf-8') as f:
+        index_old = json.load(f)
+    if index_old != index:
+        with open('results/index.json', 'w', encoding='utf-8') as f:
+            json.dump(index, f, ensure_ascii=False)
+else:
+    with open('results/index.json', 'w', encoding='utf-8') as f:
+        json.dump(index, f, ensure_ascii=False)
